@@ -1,24 +1,33 @@
 <template>
   <div class="recommend">
-    <Banner :banners="banners"></Banner>
-    <Personalized :personalized="personalized" :title="'推荐歌单'"></Personalized>
-    <Personalized :personalized="albums" :title="'最新专辑'"></Personalized>
-    <SongList :songs="songs"></SongList>
+    <div class="recommend-warpper">
+      <ScrollView>
+        <div><Banner :banners="banners"></Banner>
+          <Personalized :personalized="personalized" :title="'推荐歌单'" @select="fatherSelectItem" :type="'personalized'"></Personalized>
+          <Personalized :personalized="albums" :title="'最新专辑'" @select="fatherSelectItem" :type="'albums'"></Personalized>
+          <SongList :songs="songs"></SongList></div>
+      </ScrollView>
+    </div>
+    <transition>
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 
 <script>
 import { getBanner, getPersonalized, getNewALlbum, getNewsong } from '../api/index'
-import Banner from '../components/Banner'
-import Personalized from '../components/Personalized'
-import SongList from '../components/SongList'
+import Banner from '../components/Recommend/Banner'
+import Personalized from '../components/Recommend/Personalized'
+import SongList from '../components/Recommend/SongList'
+import ScrollView from '../components/ScrollView'
 
 export default {
   name: 'Recommend',
   components: {
     Banner,
     Personalized,
-    SongList
+    SongList,
+    ScrollView
   },
   data () {
     return {
@@ -26,6 +35,13 @@ export default {
       personalized: [],
       albums: [],
       songs: []
+    }
+  },
+  methods: {
+    fatherSelectItem (id, type) {
+      this.$router.push({
+        path: `/recommend/detail/${id}/${type}`
+      })
     }
   },
   created () {
@@ -61,6 +77,41 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+  .recommend{
+    position: fixed;
+    top: 184px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /*overflow: hidden;*/
+    .recommend-warpper{
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+  }
 
+  .v-enter{
+    transform: translateX(100%);
+    /*opacity: 0;*/
+  }
+  .v-enter-to{
+    transform: translateX(0%);
+    /*opacity: 1;*/
+  }
+  .v-enter-active{
+    transition: all 0.5s;
+  }
+  .v-leave{
+    /*opacity: 1;*/
+    transform: translateX(0%);
+  }
+  .v-leave-to{
+    /*opacity: 0;*/
+    transform: translateX(100%);
+  }
+  .v-leave-active{
+    transition: all 0.5s;
+  }
 </style>
