@@ -4,8 +4,9 @@
         <h3>最新音乐</h3>
       </div>
       <ul class="song-list">
-        <li v-for="value in songs" :key="value.id" class="item">
-          <img :src="value.song.album.picUrl" alt="">
+        <li v-for="value in songs" :key="value.id" class="item" @click="selectMusic">
+          <!--<img :src="value.song.album.picUrl" alt="">-->
+          <img v-lazy="value.song.album.picUrl" alt="">
           <div>
             <h3>{{value.name}}</h3>
             <p>{{value.song.artists[0].name}}</p>
@@ -16,6 +17,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 export default {
   name: 'SongList',
   props: {
@@ -24,13 +26,21 @@ export default {
       default: () => [],
       required: true
     }
+  },
+  methods: {
+    ...mapActions([
+      'setFullScreen'
+    ]),
+    selectMusic () {
+      this.setFullScreen(true)
+    }
   }
 }
 </script>
 
 <style scoped lang="scss">
-  @import "../assets/css/mixin";
-  @import "../assets/css/variable";
+  @import "../../assets/css/mixin";
+  @import "../../assets/css/variable";
 .song{
   width: 100%;
   @include bg_sub_color();
