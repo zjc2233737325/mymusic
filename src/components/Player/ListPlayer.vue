@@ -1,26 +1,32 @@
 <template>
-    <div class="list-player" v-show="isShow">
+  <transition
+    :css="false"
+    @enter="enter"
+    @leave="leave">
+    <div class="list-player" v-show="isShowListPlayer">
       <div class="player-warpper">
         <div class="player-top">
           <div class="top-left">
-            <div class="model"></div>
-            <p>顺序播放</p>
+            <div class="model loop" @click="mode" ref="mode"></div>
+            <p v-if="this.modeType === 0">顺序播放</p>
+            <p v-else-if="this.modeType === 1">单曲播放</p>
+            <p v-else-if="this.modeType === 2">随机播放</p>
           </div>
           <div class="top-right">
-            <div class="del"></div>
+            <div class="del" @click="delAll"></div>
           </div>
         </div>
         <div class="player-middle">
-          <ScrollView>
-            <ul>
-              <li class="item">
+          <ScrollView ref="scrollView">
+            <ul ref="play">
+              <li class="item" v-for="(value, index) in songs" :key="value.id" @click="selectMusic(index)">
                 <div class="item-left">
-                  <div class="item-play"></div>
-                  <p>演员</p>
+                  <div class="item-play" @click.stop="play" v-show="currentIndex === index"></div>
+                  <p>{{value.name}}</p>
                 </div>
                 <div class="item-right">
                   <div class="item-favorite"></div>
-                  <div class="item-del"></div>
+                  <div class="item-del" @click.stop="del(index)"></div>
                 </div>
               </li>
             </ul>
@@ -31,26 +37,97 @@
         </div>
       </div>
     </div>
+  </transition>
 </template>
 
 <script>
 import ScrollView from '../../components/ScrollView'
+import Velocity from 'velocity-animate'
+import 'velocity-animate/velocity.ui'
+import { mapGetters, mapActions } from 'vuex'
+import modeType from '../../store/modeType'
+
 export default {
   name: 'ListPlayer',
   components: {
     ScrollView
   },
   methods: {
-    show () {
-      this.isShow = true
-    },
+    ...mapActions([
+      'setIsPlaying',
+      'setModeType',
+      'setListPlayer',
+      'setDelSong',
+      'setCurrentIndex'
+    ]),
     hidden () {
-      this.isShow = false
+      this.setListPlayer(false)
+    },
+    enter (el, done) {
+      Velocity(el, 'transition.fadeIn', { duration: 500 }, function () {
+        done()
+      })
+    },
+    leave (el, done) {
+      Velocity(el, 'transition.fadeOut', { duration: 500 }, function () {
+        done()
+      })
+    },
+    play () {
+      this.setIsPlaying(!this.isPlaying)
+    },
+    mode () {
+      if (this.modeType === modeType.loop) {
+        this.setModeType(modeType.one)
+      } else if (this.modeType === modeType.one) {
+        this.setModeType(modeType.random)
+      } else if (this.modeType === modeType.random) {
+        this.setModeType(modeType.loop)
+      }
+    },
+    del (index) {
+      this.setDelSong(index)
+    },
+    delAll () {
+      this.setDelSong()
+    },
+    selectMusic (index) {
+      this.setCurrentIndex(index)
     }
   },
-  data: function () {
-    return {
-      isShow: false
+  computed: {
+    ...mapGetters([
+      'isPlaying',
+      'modeType',
+      'isShowListPlayer',
+      'songs',
+      'currentIndex'
+    ])
+  },
+  watch: {
+    isPlaying (newValue, oldValue) {
+      if (newValue) {
+        this.$refs.play.classList.add('active')
+      } else {
+        this.$refs.play.classList.remove('active')
+      }
+    },
+    modeType (newValue, oldValue) {
+      if (newValue === modeType.loop) {
+        this.$refs.mode.classList.remove('random')
+        this.$refs.mode.classList.add('loop')
+      } else if (newValue === modeType.one) {
+        this.$refs.mode.classList.remove('loop')
+        this.$refs.mode.classList.add('one')
+      } else if (newValue === modeType.random) {
+        this.$refs.mode.classList.remove('one')
+        this.$refs.mode.classList.add('random')
+      }
+    },
+    isShowListPlayer (newValue, oldValue) {
+      if (newValue) {
+        this.$refs.scrollView.refresh()
+      }
     }
   }
 }
@@ -80,7 +157,15 @@ export default {
           width: 56px;
           height: 56px;
           margin-right: 20px;
-          @include bg_img('../../assets/images/small_loop')
+          &.loop{
+            @include bg_img('../../assets/images/small_loop')
+          }
+          &.one{
+            @include bg_img('../../assets/images/small_one')
+          }
+          &.random{
+            @include bg_img('../../assets/images/small_shuffle')
+          }
         }
         p{
           @include font_color();
@@ -96,6 +181,17 @@ export default {
       }
     }
     .player-middle{
+      height: 700px;
+      overflow: hidden;
+      ul{
+        &.active{
+          .item{
+            .item-play{
+              @include bg_img('../../assets/images/small_pause');
+            }
+          }
+        }
+      }
       .item{
         border-top: 1px solid #ccc;
         height: 100px;
@@ -111,7 +207,7 @@ export default {
             width: 56px;
             height: 56px;
             margin-right: 20px;
-            @include bg_img('../../assets/images/small_play')
+            @include bg_img('../../assets/images/small_play');
           }
           p{
             @include font_size($font_medium_s);
