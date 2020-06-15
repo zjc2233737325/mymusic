@@ -1,4 +1,8 @@
 <template>
+  <transition
+    :css="false"
+  @enter="enter"
+  @leave="leave">
   <!--<div class="narmal-player" v-show="this.$store.getters.isFullScreen">-->
   <div class="narmal-player" v-show="this.isFullScreen">
     <div class="player-warpper">
@@ -7,16 +11,19 @@
       <PlayerBottom></PlayerBottom>
     </div>
     <div class="player-bg">
-      <img src="http://news.lyd.com.cn/pic/003/003/415/00300341501_742c978b.jpg" alt="">
+      <img :src="currentSong.picUrl" alt="">
     </div>
   </div>
+  </transition>
 </template>
 
 <script>
 import PlayerHeader from './PlayerHeader'
 import PlayerMiddle from './PlayerMiddle'
 import PlayerBottom from './PlayerBottom'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
+import Velocity from 'velocity-animate'
+import 'velocity-animate/velocity.ui'
 export default {
   name: 'NormalPlayer',
   components: {
@@ -26,9 +33,42 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'isFullScreen'
+      'isFullScreen',
+      'currentSong'
     ])
+  },
+  methods: {
+    ...mapActions([
+      'getSongLyric'
+    ]),
+    enter (el, done) {
+      Velocity(el, 'transition.fadeIn', { duration: 500 }, function () {
+        done()
+      })
+    },
+    leave (el, done) {
+      Velocity(el, 'transition.fadeOut', { duration: 500 }, function () {
+        done()
+      })
+    }
+  },
+  watch: {
+    currentSong (newValue, oldValue) {
+      if (newValue.id === undefined) {
+        return
+      }
+      this.getSongLyric(newValue.id)
+    }
   }
+  // watch: {
+  //   currentSong (newValue, oldValue) {
+  //     if (newValue.id === undefined) {
+  //       console.log(newValue)
+  //     }
+  //     // console.log(newValue.id)
+  //     this.getSongLyric(newValue.id)
+  //   }
+  // }
 }
 </script>
 

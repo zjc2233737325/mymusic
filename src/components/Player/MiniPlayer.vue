@@ -1,34 +1,76 @@
 <template>
-<div class="mini-player">
+  <transition
+    :css="false"
+    @enter="enter"
+    @leave="leave">
+<div class="mini-player" v-show="this.isShowMiniPlayer">
   <div class="player-warpper">
     <div class="player-left" @click="showNormalPlayer">
-      <img src="http://news.lyd.com.cn/pic/003/003/415/00300341501_742c978b.jpg" alt="">
+      <img :src="currentSong.picUrl" alt="" ref="cd">
       <div class="player-title">
-        <h3>演员</h3>
-        <p>周杰伦</p>
+        <h3>{{currentSong.name}}</h3>
+        <p>{{currentSong.singer}}</p>
       </div>
     </div>
     <div class="player-right">
-      <div class="player"></div>
+      <div class="player" @click="play" ref="play"></div>
       <div class="list" @click.stop="showList"></div>
     </div>
   </div>
 </div>
+  </transition>
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
+import Velocity from 'velocity-animate'
+import 'velocity-animate/velocity.ui'
 export default {
   name: 'MiniPlayer',
   methods: {
     ...mapActions([
-      'setFullScreen'
+      'setFullScreen',
+      'setMiniPlayer',
+      'setListPlayer',
+      'setIsPlaying'
     ]),
     showList () {
-      this.$emit('showList')
+      this.setListPlayer(true)
     },
     showNormalPlayer () {
       this.setFullScreen(true)
+      this.setMiniPlayer(false)
+    },
+    enter (el, done) {
+      Velocity(el, 'transition.fadeIn', { duration: 500 }, function () {
+        done()
+      })
+    },
+    leave (el, done) {
+      Velocity(el, 'transition.fadeOut', { duration: 500 }, function () {
+        done()
+      })
+    },
+    play () {
+      this.setIsPlaying(!this.isPlaying)
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'isShowMiniPlayer',
+      'isPlaying',
+      'currentSong'
+    ])
+  },
+  watch: {
+    isPlaying (newValue, oldValue) {
+      if (newValue) {
+        this.$refs.play.classList.add('active')
+        this.$refs.cd.classList.add('active')
+      } else {
+        this.$refs.play.classList.remove('active')
+        this.$refs.cd.classList.remove('active')
+      }
     }
   }
 }
@@ -58,11 +100,16 @@ export default {
           height: 100px;
           border-radius: 50%;
           margin-right: 20px;
+          animation: sport 5s linear infinite;
+          animation-play-state: paused;
+          &.active{
+            animation-play-state: running;
+          }
         }
         .player-title{
           display: flex;
           flex-direction: column;
-          align-items: center;
+          /*align-items: center;*/
           justify-content: center;
           h3{
             @include font_size($font_medium);
@@ -80,7 +127,10 @@ export default {
         .player{
           width: 84px;
           height: 84px;
-          @include bg_img('../../assets/images/play')
+          @include bg_img('../../assets/images/play');
+          &.active{
+            @include bg_img('../../assets/images/pause');
+          }
         }
         .list{
           width: 120px;
@@ -90,5 +140,12 @@ export default {
       }
     }
   }
-
+  @keyframes sport {
+    from{
+      transform: rotate(0deg);
+    }
+    to{
+      transform: rotate(360deg);
+    }
+  }
 </style>
