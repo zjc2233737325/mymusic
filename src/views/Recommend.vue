@@ -15,6 +15,8 @@
 </template>
 
 <script>
+/* eslint-disable dot-notation */
+
 import { getBanner, getPersonalized, getNewALlbum, getNewsong } from '../api/index'
 import Banner from '../components/Recommend/Banner'
 import Personalized from '../components/Recommend/Personalized'
@@ -68,7 +70,26 @@ export default {
       })
     getNewsong().then((data) => {
       // console.log(data)
-      this.songs = data.result
+      // this.songs = data.result
+      // console.log(data.result)
+      const list = []
+      data.result.forEach((value) => {
+        const obj = {}
+        obj.id = value.id
+        obj.name = value.name
+        obj.picUrl = value.song.album.picUrl
+        let singer = ''
+        for (let i = 0; i < value.song['artists'].length; i++) {
+          if (i === 0) {
+            singer = value.song['artists'][i].name
+          } else {
+            singer += '-' + value.song['artists'][i].name
+          }
+        }
+        obj.singer = singer
+        list.push(obj)
+      })
+      this.songs = list
     })
       .catch(function (error) {
         console.log(error)
@@ -90,28 +111,5 @@ export default {
       height: 100%;
       overflow: hidden;
     }
-  }
-
-  .v-enter{
-    transform: translateX(100%);
-    /*opacity: 0;*/
-  }
-  .v-enter-to{
-    transform: translateX(0%);
-    /*opacity: 1;*/
-  }
-  .v-enter-active{
-    transition: all 0.5s;
-  }
-  .v-leave{
-    /*opacity: 1;*/
-    transform: translateX(0%);
-  }
-  .v-leave-to{
-    /*opacity: 0;*/
-    transform: translateX(100%);
-  }
-  .v-leave-active{
-    transition: all 0.5s;
   }
 </style>
