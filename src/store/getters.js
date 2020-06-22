@@ -33,5 +33,14 @@ export default {
   },
   currentIndex (state) {
     return state.currentIndex
+  },
+  curTime (state) {
+    return state.curTime
+  },
+  favoriteList (state) {
+    return state.favoriteList
+  },
+  historyList (state) {
+    return state.historyList
   }
 }

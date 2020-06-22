@@ -26,6 +26,11 @@ const Rank = (resolve) => {
     resolve(module)
   })
 }
+const Account = (resolve) => {
+  import('../views/Account').then((module) => {
+    resolve(module)
+  })
+}
 const Search = (resolve) => {
   import('../views/Search').then((module) => {
     resolve(module)
@@ -47,7 +52,8 @@ const routes = [
   },
   { path: '/singer', component: Singer },
   { path: '/rank', component: Rank },
-  { path: '/search', component: Search }
+  { path: '/search', component: Search },
+  { path: '/account', component: Account }
 ]
 
 const router = new VueRouter({

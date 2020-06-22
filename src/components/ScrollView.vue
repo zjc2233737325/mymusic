@@ -54,6 +54,9 @@ export default {
       setTimeout(() => {
         this.iscroll.refresh()
       }, 100)
+    },
+    scrollTo (x, y, time) {
+      this.iscroll.scrollTo(x, y, time)
     }
   }
 }

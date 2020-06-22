@@ -7,8 +7,8 @@
   <div class="narmal-player" v-show="this.isFullScreen">
     <div class="player-warpper">
       <PlayerHeader></PlayerHeader>
-      <PlayerMiddle></PlayerMiddle>
-      <PlayerBottom></PlayerBottom>
+      <PlayerMiddle :currentTime="currentTime"></PlayerMiddle>
+      <PlayerBottom :totalTime="totalTime" :currentTime="currentTime"></PlayerBottom>
     </div>
     <div class="player-bg">
       <img :src="currentSong.picUrl" alt="">
@@ -59,16 +59,19 @@ export default {
       }
       this.getSongLyric(newValue.id)
     }
+  },
+  props: {
+    totalTime: {
+      type: Number,
+      default: 0,
+      require: true
+    },
+    currentTime: {
+      type: Number,
+      default: 0,
+      require: true
+    }
   }
-  // watch: {
-  //   currentSong (newValue, oldValue) {
-  //     if (newValue.id === undefined) {
-  //       console.log(newValue)
-  //     }
-  //     // console.log(newValue.id)
-  //     this.getSongLyric(newValue.id)
-  //   }
-  // }
 }
 </script>
 

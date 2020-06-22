@@ -6,10 +6,10 @@
       </div>
       <p>{{getFirstLyric()}}</p>
     </swiper-slide>
-    <swiper-slide class="lyric">
-      <ScrollView>
+    <swiper-slide class="lyric" ref="lyric">
+      <ScrollView ref="scrollView">
         <ul>
-          <li v-for="(value, index) in currentLyric" :key="index">{{value}}</li>
+          <li v-for="(value, key) in currentLyric" :key="key" :class="{'active' : currentLineNum === key}">{{value}}</li>
         </ul>
       </ScrollView>
     </swiper-slide>
@@ -42,14 +42,16 @@ export default {
         observer: true,
         observeParents: true,
         observeSlideChildren: true
-      }
+      },
+      currentLineNum: '0'
     }
   },
   computed: {
     ...mapGetters([
       'isPlaying',
       'currentSong',
-      'currentLyric'
+      'currentLyric',
+      'currentIndex'
     ])
   },
   watch: {
@@ -59,6 +61,39 @@ export default {
       } else {
         this.$refs.cdWapper.classList.remove('active')
       }
+    },
+    currentTime (newValue, oldValue) {
+      /* // 1.高亮歌词的同步
+      const lineNum = Math.floor(newValue) + ''
+      const result = this.currentLyric[lineNum]
+      if (result !== undefined && result !== '') {
+        this.currentLineNum = lineNum
+        // 2.歌词滚动的同步
+        const currentLyricTop = document.querySelector('li.active').offsetTop
+        const lyricHeight = this.$refs.lyric.$el.offsetHeight
+        if (currentLyricTop > lyricHeight / 2) {
+          // console.log('begin')
+          this.$refs.scrollView.scrollTo(0, lyricHeight / 2 - currentLyricTop, 100)
+        }
+      } */
+      // 1.高亮歌词的同步
+      const lineNum = Math.floor(newValue) + ''
+      this.currentLineNum = this.getActiveLineNum(lineNum)
+      // 2.歌词滚动的同步
+      const currentLyricTop = document.querySelector('li.active').offsetTop
+      const lyricHeight = this.$refs.lyric.$el.offsetHeight
+      if (currentLyricTop > lyricHeight / 2) {
+        // console.log('begin')
+        this.$refs.scrollView.scrollTo(0, lyricHeight / 2 - currentLyricTop, 100)
+      } else {
+        this.$refs.scrollView.scrollTo(0, 0, 100)
+      }
+    },
+    currentLyric (newValue, oldValue) {
+      for (const key in newValue) {
+        this.currentLineNum = key
+        return
+      }
     }
   },
   methods: {
@@ -66,6 +101,25 @@ export default {
       for (const key in this.currentLyric) {
         return this.currentLyric[key]
       }
+    },
+    getActiveLineNum (lineNum) {
+      if (lineNum < 0) {
+        return this.currentLineNum
+      }
+      const result = this.currentLyric[lineNum + '']
+      if (result === undefined || result === '') {
+        lineNum--
+        return this.getActiveLineNum(lineNum)
+      } else {
+        return lineNum + ''
+      }
+    }
+  },
+  props: {
+    currentTime: {
+      type: Number,
+      default: 0,
+      require: true
     }
   }
 }
@@ -114,7 +168,10 @@ export default {
           @include font_color();
           margin: 10px 0;
           &:last-of-type{
-            padding-bottom: 100px;
+            padding-bottom: 50%;
+          }
+          &.active{
+            color: #fff;
           }
         }
       }
