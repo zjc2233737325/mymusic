@@ -36,6 +36,8 @@ export default {
   watch: {
     isPlaying (newValue, oldValue) {
       if (newValue) {
+        // 在ios中，系统不会自动加载歌曲，所以，oncamplay不会自动执行，在pc和android系统会自动加载歌曲，oncamplay会自动执行
+        // 通过ondurationchange事件监听：当歌曲加载完成以后执行，因为只有歌曲加载完成以后，才能获取到
         this.setHistorySong(this.currentSong)
         this.$refs.audio.play()
       } else {
@@ -43,7 +45,7 @@ export default {
       }
     },
     currentIndex () {
-      this.$refs.audio.oncanplay = () => {
+      this.$refs.audio.ondurationchange = () => {
         this.totalTime = this.$refs.audio.duration
         if (this.isPlaying) {
           this.setHistorySong(this.currentSong)
@@ -80,7 +82,7 @@ export default {
     this.setHistoryList(historyList)
   },
   mounted () {
-    this.$refs.audio.oncanplay = () => {
+    this.$refs.audio.ondurationchange = () => {
       this.totalTime = this.$refs.audio.duration
     }
   },
