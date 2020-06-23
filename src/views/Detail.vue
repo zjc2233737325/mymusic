@@ -15,7 +15,7 @@ import SubHeader from '../components/Detail/DetailHeader'
 import DetailTop from '../components/Detail/DetailTop'
 import DetailBottom from '../components/Detail/DetailBottom'
 import ScrollView from '../components/ScrollView'
-import { getPlayList, getAlbum, getArtistsSongs } from '../api/index'
+import { getPlayList, getAlbum, getArtistsSongs, getTopList } from '../api/index'
 
 export default {
   name: 'Detail',
@@ -64,6 +64,20 @@ export default {
             name: data.album.name,
             coverImgUrl: data.album.picUrl,
             tracks: data.songs
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    } else if (this.$route.params.type === 'rank') {
+      getTopList({ idx: this.$route.params.id })
+        .then((data) => {
+          // console.log(data)
+          // this.playlist = data.playlist
+          this.playlist = {
+            name: data.playlist.name,
+            coverImgUrl: data.playlist.creator.backgroundUrl,
+            tracks: data.playlist.tracks
           }
         })
         .catch((err) => {
