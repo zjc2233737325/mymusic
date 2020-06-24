@@ -1,11 +1,37 @@
 import axios from 'axios'
+import Vue from 'vue'
 
 // 进行全局配置
 // 请求根路径配置
 axios.defaults.baseURL = 'http://localhost:3000'
 // 请求超时时间
 axios.defaults.timeout = 3000
+let count = 0
+// 添加请求拦截器
+axios.interceptors.request.use(function (config) {
+  // 在发送请求之前做些什么
+  count++
+  Vue.showLoading()
+  return config
+}, function (error) {
+  // 对请求错误做些什么
+  Vue.hiddenLoading()
+  return Promise.reject(error)
+})
 
+// 添加响应拦截器
+axios.interceptors.response.use(function (response) {
+  // 对响应数据做点什么
+  count--
+  if (count === 0) {
+    Vue.hiddenLoading()
+  }
+  return response
+}, function (error) {
+  // 对响应错误做点什么
+  Vue.hiddenLoading()
+  return Promise.reject(error)
+})
 // 封装自己的get/post方法
 export default {
   get: function (path = '', data = {}) {
