@@ -3,9 +3,9 @@ import Vue from 'vue'
 
 // 进行全局配置
 // 请求根路径配置
-axios.defaults.baseURL = 'http://localhost:3000'
+axios.defaults.baseURL = 'http://60.205.155.23:3000'
 // 请求超时时间
-axios.defaults.timeout = 3000
+axios.defaults.timeout = 30000
 let count = 0
 // 添加请求拦截器
 axios.interceptors.request.use(function (config) {

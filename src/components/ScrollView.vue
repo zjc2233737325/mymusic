@@ -12,6 +12,7 @@ export default {
     this.iscroll = new IScroll(this.$refs.wrapper, {
       mouseWheel: true,
       scrollbars: false,
+      click: true,
       probeType: 3,
       // 解决拖拽卡顿问题
       scrollX: false,
